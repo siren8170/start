@@ -1,0 +1,22 @@
+1. HTML 파일 내부 삽입하기
+  ex) <button onclick="window.alert('hello world');">hello</button>/!--태그 내에 직접 삽입--/
+     <!DOCTYPE html>
+     <html lang="ko">
+       <head> </head>
+       <body>
+         <script>
+           window.alert('hello world!');/!--script 태그로 삽입--/
+         </script>
+       </body>
+     </html>
+
+2. HTML 파일 외부에 있는 스크립트 파일을 로드
+  ex) <!DOCTYPE html>
+      <html lang="ko">
+        <head> </head>
+        <body>
+          <script src="test.js"></script>/!--외부의 다른 파일 불러오는 태그--/
+        </body>
+      </html>
+
+3. 브라우저 콘솔창
