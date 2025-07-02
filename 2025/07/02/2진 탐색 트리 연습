@@ -1,0 +1,109 @@
+typedef struct Node {
+    int data;
+    struct Node* small;
+    struct Node* big;
+} Node;
+
+typedef struct Head {
+    Node* root;
+}Head;
+
+typedef struct Direc {
+    Node* node;
+    int direc;
+}Direc;
+
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+#include<malloc.h>
+
+Direc* find_node(Node* now_node, int data) {
+    Direc* Re = NULL;
+    if (now_node->data > data) {
+        if (now_node->small != NULL) {
+            return find_node(now_node->small, data);
+        }
+        else {
+            Re->node = now_node;
+            Re->direc = 1;
+            return Re;
+        }
+    }
+    else if (now_node->data < data) {
+        if (now_node->big != NULL) {
+            return find_node(now_node->big, data);
+        }
+        else {
+            Re->node = now_node;
+            Re->direc = 2;
+            return Re;
+        }
+    }
+    else {
+        Re->node = NULL;
+        Re->direc = 0;
+        return Re;
+    }
+}
+
+void create_node(Head* head, int data) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->data = data;
+    new_node->small = NULL;
+    new_node->big = NULL;
+    if (head->root == NULL) {
+        head->root = new_node;
+    }
+    else {
+        Direc* back_node = find_node(head->root, data);
+        if (back_node != NULL) {
+            if (back_node->direc == 1) {
+                back_node->node->small = new_node;
+            }
+            else if (back_node->direc == 2) {
+                back_node->node->big = new_node;
+            }
+            else {
+                free(new_node);
+            }
+        }
+    }
+}
+
+void cls_node(Node* node) {
+    if (node->small != NULL) {
+        cls_node(node->small);
+    }
+    if (node->big != NULL) {
+        cls_node(node->big);
+    }
+    free(node);
+}
+
+int main() {
+    int roof;
+    int data;
+    Head* head = (Head*)malloc(sizeof(Head));
+    head->root = NULL;
+
+    scanf("%d", &roof);
+    for (int i = 0; i < roof; i++) {
+        scanf("%d", &data);
+        create_node(head, data);
+    }
+
+    scanf("%d", &roof);
+    for (int i = 0; i < roof; i++) {
+        scanf("%d", &data);
+        if (find_node(head, data)->direc == 0) {
+            printf("1");
+        }
+        else {
+            printf("0");
+        }
+        printf("\n");
+    }
+
+    cls_node(head->root);
+    free(head);
+}
