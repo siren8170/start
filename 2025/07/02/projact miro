@@ -1,0 +1,246 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+
+#define USER 8
+
+// 1404 성**
+// 8x8 미로 배열을 동적할당하고 초기값으로 세팅하는 함수
+int** create() {
+	int rows = 8;
+	int cols = 8;
+
+	// 2차원 배열 동적할당
+	int** miro_arr = (int**)malloc(rows * sizeof(int*));
+	if (miro_arr == NULL) {
+		printf("메모리 할당 실패");
+		return NULL;
+	}
+
+	for (int i = 0; i < rows; i++) {
+		miro_arr[i] = (int*)malloc(cols * sizeof(int));
+		if (miro_arr[i] == NULL) {
+			printf("메모리 할당 실패");
+			for (int j = 0; j < i; j++) {
+				free(miro_arr[j]);
+			}
+			free(miro_arr);
+			return NULL;
+		}
+	}
+
+	// 8x8 미로 초기값 배열
+	int preset[8][8] = {
+		{1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 0, 0, 0, 0, 1, 1, 1},
+		{1, 1, 1, 1, 0, 1, 1, 1},
+		{1, 1, USER, 1, 0, 0, 0, 1},
+		{1, 1, 0, 1, 0, 1, 0, 1},
+		{1, 1, 0, 0, 0, 1, 0, 1},
+		{1, 1, 1, 1, 1, 1, 2, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1}
+	};
+
+	// 초기값을 동적배열에 복사
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			miro_arr[i][j] = preset[i][j];
+		}
+	}
+
+	return miro_arr;
+}
+
+// 1402 김**
+// 미로 배열에서 USER 위치(좌표)를 찾아 result 배열에 저장하는 함수
+void find_user(int** miro_arr, int result[2]) {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (miro_arr[i][j] == USER) {
+				result[0] = i;  // 행 좌표 저장
+				result[1] = j;  // 열 좌표 저장
+				return;
+			}
+		}
+	}
+}
+
+// 1401 김**
+// USER 주변 3x3 영역을 출력하는 함수
+// USER 위치를 찾고, 해당 위치 기준으로 출력
+int print(int** miro_arr) {
+	int user_pos[2] = { 10, 10 };
+	find_user(miro_arr, user_pos);
+
+	// USER 위치를 못 찾으면 오류 출력 후 종료
+	if (user_pos[0] == 10) {
+		printf("오류가 발생했습니다.\n 프로그램을 종료합니다.");
+		exit(1);
+	}
+
+	// USER 기준 상하좌우 1칸씩 총 3x3 영역 출력
+	for (int i = user_pos[0] - 1; i <= user_pos[0] + 1; i++) {
+		for (int j = user_pos[1] - 1; j <= user_pos[1] + 1; j++) {
+			printf("%d ", miro_arr[i][j]);
+		}
+		printf("\n");
+	}
+	return 0;
+}
+
+// 1402 김**
+// 좌우 이동 처리 함수 (A: 왼쪽, D: 오른쪽)
+// 이동 가능 여부를 판단해 0, 1, 2 반환
+int left_right_func(int** miro_arr, char direction) {
+	int user_pos[2];
+	find_user(miro_arr, user_pos);
+
+	if (direction == 'A') {
+		if (miro_arr[user_pos[0]][user_pos[1] - 1] == 1) // 벽이면 이동 불가
+			return 0;
+		else if (miro_arr[user_pos[0]][user_pos[1] - 1] == 2) // 도착지 도달
+			return 2;
+		else {
+			// 이동 처리 (USER 위치 업데이트)
+			miro_arr[user_pos[0]][user_pos[1] - 1] = USER;
+			miro_arr[user_pos[0]][user_pos[1]] = 0;
+			return 1;
+		}
+	}
+	else if (direction == 'D') {
+		if (miro_arr[user_pos[0]][user_pos[1] + 1] == 1)
+			return 0;
+		else if (miro_arr[user_pos[0]][user_pos[1] + 1] == 2)
+			return 2;
+		else {
+			miro_arr[user_pos[0]][user_pos[1] + 1] = USER;
+			miro_arr[user_pos[0]][user_pos[1]] = 0;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+// 1405 신**
+// 상하 이동 처리 함수 (W: 위, S: 아래)
+// 이동 가능 여부를 판단해 0, 1, 2 반환
+int up_down_func(int** miro_arr, char direction) {
+	int user_pos[2];
+	find_user(miro_arr, user_pos);
+
+	int re;
+	int up_down;
+
+	// 방향에 따라 이동 행 변화값 설정
+	if (direction == 'W') {
+		up_down = -1;  // 위로 이동
+	}
+	else {
+		up_down = 1;   // 아래로 이동
+	}
+
+	if (miro_arr[user_pos[0] + up_down][user_pos[1]] == 0) {
+		// 이동 가능: USER 위치 갱신
+		miro_arr[user_pos[0] + up_down][user_pos[1]] = USER;
+		miro_arr[user_pos[0]][user_pos[1]] = 0;
+		re = 1;
+	}
+	else if (miro_arr[user_pos[0] + up_down][user_pos[1]] == 1) {
+		// 벽이면 이동 불가
+		re = 0;
+	}
+	else {
+		// 도착지 도달
+		re = 2;
+	}
+
+	return re;
+}
+
+// 1414 이**
+// 사용자 입력을 받아 움직임을 처리하고 재귀호출로 반복하는 함수
+int repeat(int** miro_arr) {
+	system("cls");
+
+	char direction;
+	int n = 0;
+
+	// 현재 USER 주변 3x3 미로 상태 출력
+	print(miro_arr);
+
+	printf("\n >");
+	scanf(" %c", &direction);
+
+	// 방향에 따른 함수 호출
+	if (direction == 'A' || direction == 'D') {
+		n = left_right_func(miro_arr, direction);
+	}
+	else if (direction == 'W' || direction == 'S') {
+		n = up_down_func(miro_arr, direction);
+	}
+
+	
+	if (n == 1 || n == 0) {
+		// 정상 이동 혹은 이동 불가면 다시 반복
+		return repeat(miro_arr);
+	}
+	else if (n == 2) {
+		// 도착지 도달 시 축하 메시지 출력 후 종료
+		system("cls");
+		Sleep(4000);
+
+		printf("축하합니다!! 당신은 디지털 세계를 탐험했고, 방금 당신이 도착하므로써 게임이 종료 되었습니다");
+		Sleep(4000);
+		return 0;
+	}
+}
+
+// 1405 신**
+// 메인 함수: 미로 생성, 안내문 출력, 게임 시작 및 종료 처리
+int main() {
+	// 미로 만들기
+	int** miro_arr = create();
+	if (miro_arr == NULL) {
+		system("cls");
+		printf("오류가 발생했습니다.\n게임을 종료합니다");
+		return 0;
+	}
+
+	printf("미로 데이터 지우고 개발자 커피 사주는 게임");
+	Sleep(4000);
+
+	system("cls");
+	printf("0은 길, 1은 벽, 2는 개발자, 8은 당신입니다.");
+	Sleep(4000);
+
+	printf("\n개발자를 데이터 지옥에서 꺼내주세요");
+	Sleep(4000);
+
+	system("cls");
+	printf("Caps Lock 켜주시면 감사합니다");
+	Sleep(4000);
+
+	// 게임 시작
+	repeat(miro_arr);
+
+	// 동적할당 해제
+	for (int i = 0; i < 8; i++) {
+		free(miro_arr[i]);
+	}
+	free(miro_arr);
+
+	// 게임 종료
+	system("cls");
+	printf("덕분에 미로를 포함한 모든 데이터가 사라졌고 저희가 해방될 수 있었습니다.\n");
+	Sleep(4000);
+
+	printf("감사합니다.\n");
+	Sleep(4000);
+
+	system("cls");
+	printf("\n\n\n\n\n\n\n\n\n\n fin.개발자에게 커피쏘기\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+	return 0;
+}
