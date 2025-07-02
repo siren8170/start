@@ -1,0 +1,12 @@
+let age = 30;
+let name = 'Jun';
+// console.log(age); 이게 단일 행
+console.log(name);
+
+/*
+이 코드는 사용자의 나이와 이름을 저장합니다.
+변수 age는 사용자의 나이를 저장하고,
+변수 name은 사용자의 이름을 저장합니다. 이게 복수 행
+*/
+let age = 30;
+let name = 'Jun';
