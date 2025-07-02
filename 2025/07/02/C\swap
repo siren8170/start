@@ -1,0 +1,32 @@
+#include<stdio.h>
+
+void swp(int*, int*);
+void swp2(int[]);
+
+int main() {
+	int a = 10;
+	int b = 20;
+
+	int n[2] = { 10, 20 };
+
+	swp(&a, &b);
+	swp2(n);
+
+	printf("%d %d\n", a, b);
+	printf("%d %d", n[0], n[1]);
+}
+
+void swp(int* a, int* b) {
+	int temp;
+	temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
+void swp2(int n[]) {
+	int temp;
+	temp = n[0];
+	n[0] = n[1];
+	n[1] = temp;
+
+ }
